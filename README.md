@@ -189,6 +189,7 @@ DataMapping.ImportProfiles["AresDefault"] = {
 The information within this data mapping is used to perform the bibliographic api call. The `Field` is the product field that the data will be imported into, `MaxSize` is the maximum character size the data going into the product field can be, and `Value` is the XPath query to the information.
 
 >**Note:** Previously, the addon allowed one to specify multiple xPath queries for a single field by separating them with a comma. This prevented the use of Xpath expressions which contained commas, so the functionality was removed. Instead, one should use Xpath operators to specify multiple Xpath queries for a single field.
+
 for example, to import subfields 'a' and 'b' from either the MARC 100, 110, or 111 use:
 
 `//datafield[@tag='100' or @tag='110' or @tag='111']/subfield[@code='a' or @code='b']`.
@@ -196,131 +197,6 @@ for example, to import subfields 'a' and 'b' from either the MARC 100, 110, or 1
 If you expect more than one of the MARC fields in the Xpath expression could exist simultaneously, you can use '[1]' notation to select the first matching node.
 
 `//datafield[@tag='100' or @tag='110' or @tag='111'][1]/subfield[@code='a' or @code='b']`
-
-*Default Configuration*
-
-```lua
-DataMapping.ImportFields.Bibliographic["AeonDefault"] = {
-    {
-        Table = "Transaction",
-        Field = "ItemTitle", MaxSize = 255,
-        Value = "//datafield[@tag='245']/subfield[@code='a']|//datafield[@tag='245']/subfield[@code='b']"
-    },
-    {
-        Table = "Transaction",
-        Field = "ItemAuthor", MaxSize = 255,
-        Value = "//datafield[@tag='100']/subfield[@code='a']|//datafield[@tag='100']/subfield[@code='b'],//datafield[@tag='110']/subfield[@code='a']|//datafield[@tag='110']/subfield[@code='b'],//datafield[@tag='111']/subfield[@code='a']|//datafield[@tag='111']/subfield[@code='b']"
-    },
-    {
-        Table = "Transaction",
-        Field = "ItemPublisher", MaxSize = 255,
-        Value = "//datafield[@tag='260']/subfield[@code='b']"
-    },
-    {
-        Table = "Transaction",
-        Field = "ItemPlace", MaxSize = 255,
-        Value = "//datafield[@tag='260']/subfield[@code='a']"
-    },
-    {
-        Table = "Transaction",
-        Field ="ItemDate", MaxSize = 50,
-        Value = "//datafield[@tag='260']/subfield[@code='c']"
-    },
-    {
-        Table = "Transaction",
-        Field = "ItemEdition", MaxSize = 50,
-        Value = "//datafield[@tag='250']/subfield[@code='a']"
-    },
-    {
-        Table = "Transaction",
-        Field = "ItemIssue", MaxSize = 255,
-        Value = "//datafield[@tag='773']/subfield[@code='g']"
-    }
-};
-
-DataMapping.ImportFields.Bibliographic["ILLiadDefault"] = {
-    {
-        Table = "Transaction",
-        LoanField = "LoanTitle", ArticleField = "PhotoJournalTitle",
-        MaxSize = 255,
-        Value = "//datafield[@tag='245']/subfield[@code='a']|//datafield[@tag='245']/subfield[@code='b']"
-    },
-    {
-        Table = "Transaction",
-        LoanField = "LoanAuthor", ArticleField = "PhotoItemAutor",
-        MaxSize = 100,
-        Value = "//datafield[@tag='100']/subfield[@code='a']|//datafield[@tag='100']/subfield[@code='b'],//datafield[@tag='110']/subfield[@code='a']|//datafield[@tag='110']/subfield[@code='b'],//datafield[@tag='111']/subfield[@code='a']|//datafield[@tag='111']/subfield[@code='b']"
-    },
-    {
-        Table = "Transaction",
-        LoanField = "LoanPublisher", ArticleField = "PhotoItemPublisher",
-        MaxSize = 40,
-        Value = "//datafield[@tag='260']/subfield[@code='b']"
-    },
-    {
-        Table = "Transaction",
-        LoanField = "LoanPlace", ArticleField = "PhotoItemPlace",
-        MaxSize = 30,
-        Value = "//datafield[@tag='260']/subfield[@code='a']"
-    },
-    {
-        Table = "Transaction",
-        LoanField = "LoanDate", ArticleField = "PhotoJournalYear",
-        MaxSize = 30,
-        Value = "//datafield[@tag='260']/subfield[@code='c']"
-    },
-    {
-        Table = "Transaction",
-        LoanField = "LoanEdition", ArticleField = "PhotoItemEdition",
-        MaxSize = 30,
-        Value = "//datafield[@tag='250']/subfield[@code='a']"
-    },
-    {
-        Table = "Transaction",
-        LoanField = "PhotoJournalIssue", ArticleField = "PhotoJournalIssue",
-        MaxSize = 30,
-        Value = "//datafield[@tag='773']/subfield[@code='g']"
-    }
-};
-
-DataMapping.ImportFields.Bibliographic["AresDefault"] = {
-    {
-        Table = "Item",
-        Field = "Title", MaxSize = 255,
-        Value = "//datafield[@tag='245']/subfield[@code='a']|//datafield[@tag='245']/subfield[@code='b']"
-    },
-    {
-        Table = "Item",
-        Field = "Author", MaxSize = 255,
-        Value = "//datafield[@tag='100']/subfield[@code='a']|//datafield[@tag='100']/subfield[@code='b'],//datafield[@tag='110']/subfield[@code='a']|//datafield[@tag='110']/subfield[@code='b'],//datafield[@tag='111']/subfield[@code='a']|//datafield[@tag='111']/subfield[@code='b']"
-    },
-    {
-        Table = "Item",
-        Field = "Publisher", MaxSize = 50,
-        Value = "//datafield[@tag='260']/subfield[@code='b']"
-    },
-    {
-        Table = "Item",
-        Field = "PubPlace", MaxSize = 30,
-        Value = "//datafield[@tag='260']/subfield[@code='a']"
-    },
-    {
-        Table = "Item",
-        Field ="PubDate", MaxSize = 50,
-        Value = "//datafield[@tag='260']/subfield[@code='c']"
-    },
-    {
-        Table = "Item",
-        Field = "Edition", MaxSize = 50,
-        Value = "//datafield[@tag='250']/subfield[@code='a']"
-    },
-    {
-        Table = "Item",
-        Field = "Issue", MaxSize = 255,
-        Value = "//datafield[@tag='773']/subfield[@code='g']"
-    }
-};
-```
 
 ### Item Import
 The information within this data mapping is used import the correct information from the items grid. The `Field` is the product field that the data will be imported into, `MaxSize` is the maximum character size the data going into the product field can be, and `Value` is the FieldName of the column within the item grid.

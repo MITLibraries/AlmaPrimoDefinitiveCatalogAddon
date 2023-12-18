@@ -763,6 +763,9 @@ function DoItemImport(sender, args)
         interfaceMngr:ShowMessage("Import profile may not be configured correctly. Please ensure that the import profile in DataMapping.lua corresponds to a set of holding import fields and that each is a valid " .. product .. " field. See client log for details.", "Configuration Error");
     end
 
+    -- add permalink ams 7/2021
+    AddPermaLink();
+
     cursor.Current = cursors.Default;
     if product == "Ares" then
         ExecuteCommand("SwitchTab", {"Details"});
@@ -837,7 +840,6 @@ function GetMarcInformation(importProfileName, mmsId, holdingId)
             end
         end
     end
-
     return marcInformation;
 end
 
