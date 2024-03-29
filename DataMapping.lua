@@ -190,17 +190,42 @@ DataMapping.ImportFields.Bibliographic["AeonDefault"] = {
     {
         Table = "Transaction",
         Field ="ItemDate", MaxSize = 50,
-        Value = "//datafield[@tag='260']/subfield[@code='c']"
+        Value = "//datafield[@tag='260']/subfield[@code='c']|//datafield[@tag='264']/subfield[@code='c']"
     },
     {
         Table = "Transaction",
-        Field = "ItemEdition", MaxSize = 50,
-        Value = "//datafield[@tag='250']/subfield[@code='a']"
+        Field ="ItemEdition", MaxSize = 50,
+        Value = "//datafield[@tag='300']"
     },
     {
+-- notes and boundwith information 
         Table = "Transaction",
-        Field = "ItemIssue", MaxSize = 255,
-        Value = "//datafield[@tag='773']/subfield[@code='g']"
+        Field ="ItemSubTitle", MaxSize = 255,
+        Value = "//datafield[@tag='990']|//datafield[@tag='992']|//datafield[@tag='993']"
+    },
+    {
+-- Volume/box - shirea 5/2021
+        Table = "Transaction",
+        Field ="ItemVolume", MaxSize = 255,
+        Value = "//datafield[@tag='988']/subfield[@code='p']|//datafield[@tag='988']/subfield[@code='b']"
+    },
+    {
+-- Series - shirea 5/2021
+        Table = "Transaction.CustomFields",
+        Field ="SeriesNumber", MaxSize = 255,
+        Value = "//datafield[@tag='830']"
+    },
+-- OCLC Number
+    {
+        Table = "Transaction.CustomFields",
+        Field = "OCLCNum", MaxSize = 255,
+        Value = "//datafield[@tag='035'][subfield[text()[contains(.,'(OCoLC)')]]][1]"
+    },
+-- DSpace URL
+    {
+        Table = "Transaction.CustomFields",
+        Field = "DspaceURL", MaxSize = 255,
+        Value = "//datafield[@tag='856'][subfield[text()[contains(.,'DSpace@MIT')]]]/subfield[@code='u']"
     }
 };
 
@@ -324,8 +349,8 @@ DataMapping.ImportFields.Item["AeonDefault"] = {
     },
     {
         Table = "Transaction",
-        Field = "SubLocation", MaxSize = 255,
-        Value = "Library"
+        Field = "ItemIssue", MaxSize = 255,
+        Value = "Description"
     }
 };
 
