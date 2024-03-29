@@ -13,21 +13,12 @@ DataMapping.ImportFields.StaticHolding = {};
 -- The display name for the addon's tab.
 DataMapping.LabelName = "Catalog Search";
 
--- Icons for non-search buttons.
+-- Icons for non-search buttons for Aeon. 
+    -- Icons can also be added for ILLiad or Ares by using those product names as keys.
 DataMapping.Icons["Aeon"] = {};
 DataMapping.Icons["Aeon"]["Home"] = "home_32x32";
 DataMapping.Icons["Aeon"]["Web"] = "web_32x32";
 DataMapping.Icons["Aeon"]["Retrieve Items"] = "record_32x32";
-
-DataMapping.Icons["ILLiad"] = {};
-DataMapping.Icons["ILLiad"]["Home"] = "Home32";
-DataMapping.Icons["ILLiad"]["Web"] = "Web32";
-DataMapping.Icons["ILLiad"]["Retrieve Items"] = "Record32";
-
-DataMapping.Icons["Ares"] = {};
-DataMapping.Icons["Ares"]["Home"] = "Home32";
-DataMapping.Icons["Ares"]["Web"] = "Web32";
-DataMapping.Icons["Ares"]["Retrieve Items"] = "Record32";
 
 --[[ 
     SearchTypes
@@ -44,55 +35,35 @@ DataMapping.SearchTypes["Title"] = {
     PrimoField = "title",
     SearchStyle = "Query",
     AeonIcon = "srch_32x32",
-    ILLiadIcon = "Search32",
-    AresIcon = "Search32",
-    AeonSourceField = { Table = "Transaction", Field = "ItemTitle" },
-    ILLiadSourceField = { Table = "Transaction", LoanField = "LoanTitle", ArticleField = "PhotoJournalTitle" },
-    AresSourceField = { Table = "Item", Field = "Title" }
+    AeonSourceField = { Table = "Transaction", Field = "ItemTitle" }
 };
 DataMapping.SearchTypes["Author"] = {
     ButtonText = "Author",
     PrimoField = "creator",
     SearchStyle = "Query",
     AeonIcon = "srch_32x32",
-    ILLiadIcon = "Search32",
-    AresIcon = "Search32",
-    AeonSourceField = { Table = "Transaction", Field = "ItemAuthor" },
-    ILLiadSourceField = { Table = "Transaction", LoanField = "LoanAuthor", ArticleField = "PhotoItemAuthor" },
-    AresSourceField = { Table = "Item", Field = "Author" }
+    AeonSourceField = { Table = "Transaction", Field = "ItemAuthor" }
 };
 DataMapping.SearchTypes["Call Number"] = {
     ButtonText = "Call Number",
     PrimoField = "lsr01",
     SearchStyle = "Query",
     AeonIcon = "srch_32x32",
-    ILLiadIcon = "Search32",
-    AresIcon = "Search32",
-    AeonSourceField = { Table = "Transaction", Field = "CallNumber" },
-    ILLiadSourceField = { Table = "Trannsaction", LoanField = "CallNumber", ArticleField = "CallNumber" },
-    AresSourceField = { Table = "Item", Field = "Callnumber" }
+    AeonSourceField = { Table = "Transaction", Field = "CallNumber" }
 };
 DataMapping.SearchTypes["ISBN"] = {
     ButtonText = "ISBN",
     PrimoField = "isbn",
     SearchStyle = "Query",
     AeonIcon = "srch_32x32",
-    ILLiadIcon = "Search32",
-    AresIcon = "Search32",
-    AeonSourceField = { Table = "Transaction", Field = "ItemISxN" },
-    ILLiadSourceField = { Table = "Transaction", LoanField = "ISSN", ArticleField = "ISSN" },
-    AresSourceField = { Table = "Item", Field = "ISXN" }
+    AeonSourceField = { Table = "Transaction", Field = "ItemISxN" }
 };
 DataMapping.SearchTypes["ISSN"] = {
     ButtonText = "ISSN",
     PrimoField = "issn",
     SearchStyle = "Query",
     AeonIcon = "srch_32x32",
-    ILLiadIcon = "Search32",
-    AresIcon = "Search32",
-    AeonSourceField = { Table = "Transaction", Field = "ItemISxN" },
-    ILLiadSourceField = { Table = "Transaction", LoanField = "ISSN", ArticleField = "ISSN" },
-    AresSourceField = { Table = "Item", Field = "ISXN" }
+    AeonSourceField = { Table = "Transaction", Field = "ItemISxN" }
 };
 -- Catalog Number uses the Any search type because Primo catalogs don't have built in MMS ID searching.
 DataMapping.SearchTypes["Catalog Number"] = {
@@ -100,11 +71,7 @@ DataMapping.SearchTypes["Catalog Number"] = {
     PrimoField = "any",
     SearchStyle = "Query",
     AeonIcon = "srch_32x32",
-    ILLiadIcon = "Search32",
-    AresIcon = "Search32",
-    AeonSourceField = { Table = "Transaction", Field = "ReferenceNumber" },
-    ILLiadSourceField = { Table = "Transaction", LoanField = "ReferenceNumber" , ArticleField = "ReferenceNumber" },
-    AresSourceField = { Table = "Item", Field = "ReferenceNumber" }
+    AeonSourceField = { Table = "Transaction", Field = "ReferenceNumber" }
 };
 
 -- SearchStyleUrls
@@ -116,14 +83,9 @@ DataMapping.SearchStyleUrls["Browse"] = "browse?vid={PrimoSiteCode}&browseQuery=
 
 -- Source Fields: Aeon
 -- Only necessary for source fields not associated with a SearchType. To define source fields used in searches, 
-    -- add a SourceField property prefixed with the product name to the SearchType. Do not change entries for
-    -- Identifier.
+    -- add a SourceField property prefixed with the product name to the SearchType.
 DataMapping.SourceFields["Aeon"] = {};
-DataMapping.SourceFields["Aeon"]["Identifier"] = { Table = "Transaction", Field = "TransactionNumber" };
-DataMapping.SourceFields["ILLiad"] = {};
-DataMapping.SourceFields["ILLiad"]["Identifier"] = { Table = "Transaction", LoanField = "TransactionNumber", ArticleField = "TransactionNumber" };
-DataMapping.SourceFields["Ares"] = {};
-DataMapping.SourceFields["Ares"]["Identifier"] = { Table = "Item", Field = "ItemID" }
+DataMapping.SourceFields["Aeon"]["TransactionNumber"] = { Table = "Transaction", Field = "TransactionNumber" };
 
 --[[
 Import Profiles
@@ -135,22 +97,10 @@ must have a corresponding set of import fields with matching keys in the next se
     - Icon: The name of the icon file to use as the button's image.
 --]]
 
-DataMapping.ImportProfiles["AeonDefault"] = {
+DataMapping.ImportProfiles["Default"] = {
     ButtonText = "Import",
     Product = "Aeon",
     Icon = "impt_32x32"
-}
-
-DataMapping.ImportProfiles["ILLiadDefault"] = {
-    ButtonText = "Import",
-    Product = "ILLiad",
-    Icon = "Import32"
-}
-
-DataMapping.ImportProfiles["AresDefault"] = {
-    ButtonText = "Import",
-    Product = "Ares",
-    Icon = "Import32"
 }
 
 -- Import Fields: The table for each ImportFields section must be defined for each import profile above.
@@ -166,7 +116,7 @@ DataMapping.ImportProfiles["AresDefault"] = {
         in parentheses next to the field type.
     - Value must be an XPath expression.
     --]]
-DataMapping.ImportFields.Bibliographic["AeonDefault"] = {
+DataMapping.ImportFields.Bibliographic["Default"] = {
     {
         Table = "Transaction",
         Field = "ItemTitle", MaxSize = 255,
@@ -176,16 +126,6 @@ DataMapping.ImportFields.Bibliographic["AeonDefault"] = {
         Table = "Transaction",
         Field = "ItemAuthor", MaxSize = 255,
         Value = "//datafield[@tag='100' or @tag='110' or @tag='111']/subfield[@code='a' or @code='b']"
-    },
-    {
-        Table = "Transaction",
-        Field = "ItemPublisher", MaxSize = 255,
-        Value = "//datafield[@tag='260']/subfield[@code='b']"
-    },
-    {
-        Table = "Transaction",
-        Field = "ItemPlace", MaxSize = 255,
-        Value = "//datafield[@tag='260']/subfield[@code='a']"
     },
     {
         Table = "Transaction",
@@ -238,95 +178,48 @@ DataMapping.ImportFields.Bibliographic["ILLiadDefault"] = {
     },
     {
         Table = "Transaction",
-        LoanField = "LoanAuthor", ArticleField = "PhotoItemAutor",
-        MaxSize = 100,
-        Value = "//datafield[@tag='100' or @tag='110' or @tag='111']/subfield[@code='a' or @code='b']"
+        Field ="ItemEdition", MaxSize = 50,
+        Value = "//datafield[@tag='300']"
     },
     {
+-- notes and boundwith information 
         Table = "Transaction",
-        LoanField = "LoanPublisher", ArticleField = "PhotoItemPublisher",
-        MaxSize = 40,
-        Value = "//datafield[@tag='260']/subfield[@code='b']"
+        Field ="ItemSubTitle", MaxSize = 255,
+        Value = "//datafield[@tag='990']|//datafield[@tag='992']|//datafield[@tag='993']"
     },
     {
+-- Volume/box - shirea 5/2021
         Table = "Transaction",
-        LoanField = "LoanPlace", ArticleField = "PhotoItemPlace",
-        MaxSize = 30,
-        Value = "//datafield[@tag='260']/subfield[@code='a']"
+        Field ="ItemVolume", MaxSize = 255,
+        Value = "//datafield[@tag='988']/subfield[@code='p']|//datafield[@tag='988']/subfield[@code='b']"
     },
     {
-        Table = "Transaction",
-        LoanField = "LoanDate", ArticleField = "PhotoJournalYear",
-        MaxSize = 30,
-        Value = "//datafield[@tag='260']/subfield[@code='c']"
+-- Series - shirea 5/2021
+        Table = "Transaction.CustomFields",
+        Field ="SeriesNumber", MaxSize = 255,
+        Value = "//datafield[@tag='830']"
     },
+-- OCLC Number
     {
-        Table = "Transaction",
-        LoanField = "LoanEdition", ArticleField = "PhotoItemEdition",
-        MaxSize = 30,
-        Value = "//datafield[@tag='250']/subfield[@code='a']"
+        Table = "Transaction.CustomFields",
+        Field = "OCLCNum", MaxSize = 255,
+        Value = "//datafield[@tag='035'][subfield[text()[contains(.,'(OCoLC)')]]][1]"
     },
+-- DSpace URL
     {
-        Table = "Transaction",
-        LoanField = "PhotoJournalIssue", ArticleField = "PhotoJournalIssue",
-        MaxSize = 30,
-        Value = "//datafield[@tag='773']/subfield[@code='g']"
-    }
-};
-
-DataMapping.ImportFields.Bibliographic["AresDefault"] = {
-    {
-        Table = "Item",
-        Field = "Title", MaxSize = 255,
-        Value = "//datafield[@tag='245']/subfield[@code='a']|//datafield[@tag='245']/subfield[@code='b']"
-    },
-    {
-        Table = "Item",
-        Field = "Author", MaxSize = 255,
-        Value = "//datafield[@tag='100' or @tag='110' or @tag='111']/subfield[@code='a' or @code='b']"
-    },
-    {
-        Table = "Item",
-        Field = "Publisher", MaxSize = 50,
-        Value = "//datafield[@tag='260']/subfield[@code='b']"
-    },
-    {
-        Table = "Item",
-        Field = "PubPlace", MaxSize = 30,
-        Value = "//datafield[@tag='260']/subfield[@code='a']"
-    },
-    {
-        Table = "Item",
-        Field ="PubDate", MaxSize = 50,
-        Value = "//datafield[@tag='260']/subfield[@code='c']"
-    },
-    {
-        Table = "Item",
-        Field = "Edition", MaxSize = 50,
-        Value = "//datafield[@tag='250']/subfield[@code='a']"
-    },
-    {
-        Table = "Item",
-        Field = "Issue", MaxSize = 255,
-        Value = "//datafield[@tag='773']/subfield[@code='g']"
+        Table = "Transaction.CustomFields",
+        Field = "DspaceURL", MaxSize = 255,
+        Value = "//datafield[@tag='856'][subfield[text()[contains(.,'DSpace@MIT')]]]/subfield[@code='u']"
     }
 };
 
 -- Holding-level import fields. Value must be an XPath expression.
-DataMapping.ImportFields.Holding["AeonDefault"] = {
+DataMapping.ImportFields.Holding["Default"] = {
 
-};
-
-DataMapping.ImportFields.Holding["ILLiadDefault"] = {
-
-};
-
-DataMapping.ImportFields.Holding["AresDefault"] = {
-
-};
+}
 
 -- Item-level import fields. Value should not be changed.
-DataMapping.ImportFields.Item["AeonDefault"] = {
+DataMapping.ImportFields.Item["Default"] = {
     {
         Table = "Transaction",
         Field = "ReferenceNumber", MaxSize = 50,
