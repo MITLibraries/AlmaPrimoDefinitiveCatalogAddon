@@ -2,6 +2,14 @@
 
 ## Versions
 
+**2.1.0 -**
+- Adds support for Primo NDE (`/nde/`) alongside classic Primo and Primo VE. Record page detection now relies on the `fulldisplay?...&docid=` URL pattern (consistent across all three discovery layers) instead of the `#item-details` DOM element, which is not present in NDE. MMS ID extraction reads the URL first and falls back to the page's JSON-LD `<script type="application/ld+json">` metadata block when the URL does not carry an ID.
+
+**2.0.1 -**
+- URL-based ID extraction now applies the same MMS ID (`99`) and IE ID (`[125]1`) prefix filter as the item-details scrape, preventing non-ID values in the URL's `docid` parameter from being treated as record IDs.
+- Alma API key is redacted from logged URLs and exception bodies.
+- HTTP errors from Alma now surface the response status and XML error body in logs instead of being swallowed; failed API calls log and skip rather than crashing the form.
+
 **1.0 -** Initial release, based on original Alma Primo Catalog Search and Alma Primo VE Catalog Search addons.
 
 ## Summary
@@ -13,9 +21,9 @@ The addon is located within an request or item record of an Atlas Product. It is
 
 ## Settings
 
-> **CatalogURL:** The base URL that the query strings are appended to. The Catalog URL structure is `{URL of the catalog}/primo-explore/` for Primo and `{URL of the catalog}/discovery/` for Primo VE.
+> **CatalogURL:** The base URL that the query strings are appended to. The Catalog URL structure is `{URL of the catalog}/primo-explore/` for Primo, `{URL of the catalog}/discovery/` for Primo VE, and `{URL of the catalog}/nde/` for Primo NDE.
 >
-> **HomeURL:** Home page of the catalog. The Home URL structure is `{URL of the catalog}/primo-explore/search?vid={Primo Site Code}` for Primo and `{URL of the catalog}/discovery/search?vid={Primo Site Code}` for Primo VE.
+> **HomeURL:** Home page of the catalog. The Home URL structure is `{URL of the catalog}/primo-explore/search?vid={Primo Site Code}` for Primo, `{URL of the catalog}/discovery/search?vid={Primo Site Code}:{Primo View Code}` for Primo VE, and `{URL of the catalog}/nde/search?vid={Primo Site Code}:{Primo View Code}` for Primo NDE.
 >
 > **AutoSearch:** Defines whether the search should be automatically performed when the form opens. *Default: `true`*
 >
@@ -34,7 +42,7 @@ The addon is located within an request or item record of an Atlas Product. It is
 >
 >**AlmaAPIKey:** API key used for interacting with the Alma API.
 >
->**PrimoSiteCode:** The code that identifies the site in Primo Deep Links. Ex: vid={PrimoSiteCode}
+>**PrimoCode:** For Primo, the Primo Site Code that identifies the site in Primo Deep Links. Ex: `vid={Primo Site Code}` For Primo VE and Primo NDE, the Primo View Code (including the colon) is also included in this setting. Ex: `vid={Primo Site Code}:{Primo View Code}`
 >
 >**IdSuffix:** The last four digits of MMS IDs and IE IDs for your institution. These can be found in the URL of any record opened from the results list. This setting is required and should not be left blank.
 
@@ -69,8 +77,8 @@ Below are the default configurations for the catalog addon. The mappings within 
 ### SearchTypes
 The search URL is constructed using the formulas defined in *DataMapping.SearchStyleUrls["Query"]* and *DataMapping.SearchStyleUrls["Browse"]*. The default configurations are as follows:
 
->Query: *`{Catalog URL}`search?vid=`{Primo Site Code}`&query=`{Search Type}`,contains,`{Search Term}`AND&search_scope=default_scope&mode=advanced*
->Browse: *`{Catalog URL}`browse?vid=`{Primo Site Code}`&browseQuery=`{Search Term}`&browseScope=`{Search Type}`&innerPnxIndex=-1&numOfUsedTerms=-1&fn=BrowseSearch"*
+>Query: *`{CatalogURL}`search?vid=`{PrimoCode}`&query=`{SearchType}`,contains,`{SearchTerm}`AND&search_scope=default_scope&mode=advanced*
+>Browse: *`{CatalogURL}`browse?vid=`{PrimoCode}`&browseQuery=`{SearchTerm}`&browseScope=`{SearchType}`&innerPnxIndex=-1&numOfUsedTerms=-1&fn=BrowseSearch"*
 
 *Default SearchTypes Configuration:*
 
@@ -459,7 +467,7 @@ Finally, open Catalog.lua and find the commend that says `-- Search Functions`. 
 
 ## Developers
 
-The addon is developed to support Alma Catalogs that use Primo or Primo VE as its discovery layer in [Aeon](https://www.atlas-sys.com/aeon/), [Ares](https://www.atlas-sys.com/ares), and [ILLiad](https://www.atlas-sys.com/illiad/).
+The addon is developed to support Alma Catalogs that use Primo, Primo VE, or Primo NDE as its discovery layer in [Aeon](https://www.atlas-sys.com/aeon/), [Ares](https://www.atlas-sys.com/ares), and [ILLiad](https://www.atlas-sys.com/illiad/).
 
 Atlas welcomes developers to extend the addon with additional support. All pull requests will be merged and posted to the [addon directories](https://prometheus.atlas-sys.com/display/ILLiadAddons/Addon+Directory).
 

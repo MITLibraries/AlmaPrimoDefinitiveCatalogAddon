@@ -10,7 +10,7 @@ settings.AutoRetrieveItems = GetSetting("AutoRetrieveItems");
 settings.RemoveTrailingSpecialCharacters = GetSetting("RemoveTrailingSpecialCharacters");
 settings.AlmaApiUrl = GetSetting("AlmaAPIURL");
 settings.AlmaApiKey = GetSetting("AlmaAPIKey");
-settings.PrimoSiteCode = GetSetting("PrimoSiteCode");
+settings.PrimoCode = GetSetting("PrimoCode");
 settings.IdSuffix = GetSetting("IdSuffix");
 
 local interfaceMngr = nil;
@@ -128,8 +128,7 @@ function Init()
     catalogSearchForm.Form:Show();
 
     -- Initializing the AlmaApi
-    AlmaApi.ApiUrl = settings.AlmaApiUrl;
-    AlmaApi.ApiKey = settings.AlmaApiKey;
+    AlmaApi.Initialize(settings.AlmaApiUrl, settings.AlmaApiKey);
 
     -- Search when opened if autoSearch is true
     local fieldtype = GetFieldType();
@@ -252,13 +251,13 @@ function PerformSearch(searchInfo)
     end
 
     local searchUrl = "";
-    local encodedSiteCode = Utility.URLEncode(settings.PrimoSiteCode):gsub("%%", "%%%%");
+    local encodedSiteCode = Utility.URLEncode(settings.PrimoCode):gsub("%%", "%%%%");
     local encodedSearchType = Utility.URLEncode(DataMapping.SearchTypes[searchInfo[1]]["PrimoField"]):gsub("%%", "%%%%");
     local encodedSearchTerm = Utility.URLEncode(searchTerm):gsub("%%", "%%%%");
 
     --Construct the search url based on the base catalog url and search style.
     searchUrl = settings.CatalogUrl .. DataMapping.SearchStyleUrls[searchInfo[2]]
-    :gsub("{PrimoSiteCode}", encodedSiteCode)
+    :gsub("{PrimoCode}", encodedSiteCode)
     :gsub("{SearchType}", encodedSearchType)
     :gsub("{SearchTerm}", encodedSearchTerm);
     
@@ -269,12 +268,19 @@ end
 function GetMmsIds()
     log:DebugFormat("Retrieving IDs from {0}", catalogSearchForm.Browser.Address);
 
-    local itemDetails = catalogSearchForm.Browser:EvaluateScript([[document.getElementById("item-details").innerText;]]).Result;
-    local ids = {};
-    if itemDetails then
-        ids = ExtractIds(itemDetails);
-    else
-        log:Debug("Element with ID 'item-details' not found.");
+    local ids = ExtractIds(catalogSearchForm.Browser.Address);
+    if #ids == 0 then
+        log:Debug("No IDs found in URL. Falling back to JSON-LD metadata.");
+        local jsonLd = catalogSearchForm.Browser:EvaluateScript(
+            [[(function(){
+                var jsonLdElement = document.querySelector('script[type="application/ld+json"]');
+                return jsonLdElement ? jsonLdElement.textContent : null;
+            })();]]).Result;
+        if jsonLd then
+            ids = ExtractIds(jsonLd);
+        else
+            log:Debug("JSON-LD script block not found.");
+        end
     end
 
     if #ids > 0 then
@@ -292,20 +298,13 @@ function GetMmsIds()
     return {};
 end
 
-function ExtractIds(itemDetails)
+function ExtractIds(text)
     local idMatches = {};
-    local urlId = (catalogSearchForm.Browser.Address):match("%d+" .. settings.IdSuffix);
-    -- Easy way to prevent duplicates regardless of order since the keys get overwritten.
-    -- In rare cases the URL won't contain an ID.
-    if urlId then
-        idMatches[urlId] = true;
-    end
 
     -- MMS Ids (and presumably IE IDs) all have the same last four digits specific to the institution.
     -- 99 is the prefix for MMS IDs, and IE IDs always have 1, 2, or 5 as their first digit and 1 as the second digit.
-
-    log:Info("Extracting IDs from item-details element.");
-    for id in itemDetails:gmatch("%d+" .. settings.IdSuffix) do
+    -- Table keys deduplicate matches when the same ID appears multiple times in the source text.
+    for id in text:gmatch("%d+" .. settings.IdSuffix) do
         if id:find("^99") or id:find("^[125]1") then
             log:DebugFormat("Found ID: {0}", id);
             idMatches[id] = true;
@@ -330,15 +329,20 @@ function ConvertIeIdsToMmsIds(ieIds)
     for i = 1, #ieIds do
         if ieIds[i]:find("^[125]1") then
             local bibResponse = AlmaApi.RetrieveBibs(ieIds[i], "ie_id");
-            local totalRecordCount = tonumber(bibResponse:SelectSingleNode("//@total_record_count").Value);
 
-            if totalRecordCount and totalRecordCount > 0 then
-                local mmsId = bibResponse:SelectSingleNode("bibs/bib/mms_id").InnerXml;
-                log:DebugFormat("MMS ID: {0}", mmsId);
-                if mmsId then
-                    log:DebugFormat("IE ID {0} -> MMS ID {1}", ieIds[i], mmsId);
-                    -- We want to avoid duplicates here as well.
-                    resolvedIds[mmsId] = true;
+            if bibResponse == nil then
+                log:WarnFormat("No bib response for IE ID {0}. Skipping.", ieIds[i]);
+            else
+                local totalRecordCount = tonumber(bibResponse:SelectSingleNode("//@total_record_count").Value);
+
+                if totalRecordCount and totalRecordCount > 0 then
+                    local mmsId = bibResponse:SelectSingleNode("bibs/bib/mms_id").InnerXml;
+                    log:DebugFormat("MMS ID: {0}", mmsId);
+                    if mmsId then
+                        log:DebugFormat("IE ID {0} -> MMS ID {1}", ieIds[i], mmsId);
+                        -- We want to avoid duplicates here as well.
+                        resolvedIds[mmsId] = true;
+                    end
                 end
             end
         else
@@ -356,17 +360,11 @@ end
 
 function IsRecordPageLoaded()
     local pageUrl = catalogSearchForm.Browser.Address;
-    local itemDetailsScript = [[(function(){
-        var itemDetailsElement = document.getElementById("item-details");
-        if (itemDetailsElement != null){
-            return "True";
-        }
-        return "False";
-    })();]];
 
-    local itemDetails = catalogSearchForm.Browser:EvaluateScript(itemDetailsScript).Result == "True";
-
-    if pageUrl:find("fulldisplay%?") and itemDetails then
+    -- Record pages across classic Primo, Primo VE, and Primo NDE all use the
+    -- `fulldisplay?...&docid=alma{mmsId}` URL form. Gating on the URL alone
+    -- avoids depending on DOM elements that vary across discovery layers.
+    if pageUrl:find("fulldisplay%?") and pageUrl:find("docid=") then
         log:DebugFormat("Is a record page. {0}", pageUrl);
         ToggleItemsUIElements(true);
     else
@@ -562,30 +560,38 @@ function RetrieveItems()
 
             local holdingsResponse = holdingsXmlDocCache[mmsIds[i]];
 
-            -- Check if it has any holdings available
-            local totalHoldingCount = tonumber(holdingsResponse:SelectSingleNode("holdings/@total_record_count").Value);
-            local suppressedNodeList = holdingsResponse:SelectNodes("holdings/holding/suppress_from_publishing[text()='true']");
-            local suppressedHoldingsCount = tonumber(suppressedNodeList.Count);
+            if holdingsResponse == nil then
+                log:WarnFormat("No holdings response for MMS ID {0}. Skipping.", mmsIds[i]);
+            else
+                -- Check if it has any holdings available
+                local totalHoldingCount = tonumber(holdingsResponse:SelectSingleNode("holdings/@total_record_count").Value);
+                local suppressedNodeList = holdingsResponse:SelectNodes("holdings/holding/suppress_from_publishing[text()='true']");
+                local suppressedHoldingsCount = tonumber(suppressedNodeList.Count);
 
-            log:DebugFormat("Records available: {0} ({1} total, {2} suppressed)", totalHoldingCount - suppressedHoldingsCount, totalHoldingCount, suppressedHoldingsCount);
+                log:DebugFormat("Records available: {0} ({1} total, {2} suppressed)", totalHoldingCount - suppressedHoldingsCount, totalHoldingCount, suppressedHoldingsCount);
 
-            -- Retrieve Item Data if Holdings are available
-            if totalHoldingCount - suppressedHoldingsCount > 0 then
-                hasHoldings = true;
-                -- Get list of the holding ids
-                local holdingIds = GetHoldingIds(holdingsResponse);
+                -- Retrieve Item Data if Holdings are available
+                if totalHoldingCount - suppressedHoldingsCount > 0 then
+                    hasHoldings = true;
+                    -- Get list of the holding ids
+                    local holdingIds = GetHoldingIds(holdingsResponse);
 
-                for _, holdingId in ipairs(holdingIds) do
-                    log:DebugFormat("Holding ID: {0}", holdingId);
-                    -- Cache the response if it hasn't been cached
-                    if (itemsXmlDocCache[holdingId] == nil ) then
-                        log:DebugFormat("Caching items for {0}", mmsIds[i]);
-                        itemsXmlDocCache[holdingId] = AlmaApi.RetrieveItemsList(mmsIds[i], holdingId);
+                    for _, holdingId in ipairs(holdingIds) do
+                        log:DebugFormat("Holding ID: {0}", holdingId);
+                        -- Cache the response if it hasn't been cached
+                        if (itemsXmlDocCache[holdingId] == nil ) then
+                            log:DebugFormat("Caching items for {0}", mmsIds[i]);
+                            itemsXmlDocCache[holdingId] = AlmaApi.RetrieveItemsList(mmsIds[i], holdingId);
+                        end
+
+                        local itemsResponse = itemsXmlDocCache[holdingId];
+
+                        if itemsResponse == nil then
+                            log:WarnFormat("No items response for Holding ID {0}. Skipping.", holdingId);
+                        else
+                            PopulateItemsDataSources(itemsResponse, itemsDataTable);
+                        end
                     end
-
-                    local itemsResponse = itemsXmlDocCache[holdingId];
-
-                    PopulateItemsDataSources(itemsResponse, itemsDataTable);
                 end
             end
         end
